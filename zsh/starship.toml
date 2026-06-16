@@ -1,0 +1,18 @@
+# ponytail: minimal starship — clean, fast, no clutter
+format = """$directory$git_branch$git_status$character"""
+
+[directory]
+truncation_length = 3
+style = "blue bold"
+
+[git_branch]
+format = "[$branch]($style) "
+style = "purple"
+
+[git_status]
+format = '[$all_status$ahead_behind]($style) '
+style = "red"
+
+[character]
+success_symbol = "[›](green)"
+error_symbol = "[›](red)"
