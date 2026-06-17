@@ -30,3 +30,6 @@ fi
 
 # Prompt
 eval "$(starship init zsh)"
+
+# Navigation
+eval "$(zoxide init zsh)"
