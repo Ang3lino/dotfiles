@@ -31,6 +31,8 @@ fi
 # Prompt
 if command -v starship &>/dev/null; then
   eval "$(starship init zsh)"
+else
+  PROMPT='%F{blue}%~%f %F{yellow}❯%f '
 fi
 
 # Navigation
