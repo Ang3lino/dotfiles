@@ -1,19 +1,25 @@
-temis@MDC-FT9YYB4:/mnt/c/Users/amanriquez/Documents/repos/dotfiles$ ./install.sh --mimimal > minimal.log
-
-WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
-
-curl: (60) SSL certificate problem: unable to get local issuer certificate
-More details here: https://curl.se/docs/sslcerts.html
-
-curl failed to verify the legitimacy of the server and therefore could not
-establish a secure connection to it. To learn more about this situation and
-how to fix it, please visit the web page mentioned above.
-curl: (60) SSL certificate problem: unable to get local issuer certificate
-More details here: https://curl.se/docs/sslcerts.html
-
-curl failed to verify the legitimacy of the server and therefore could not
-establish a secure connection to it. To learn more about this situation and
-how to fix it, please visit the web page mentioned above.
-unknown variable: TMUX_PLUGIN_MANAGER_PATH
-FATAL: Tmux Plugin Manager not configured in tmux.conf
-Aborting.
+Reading package lists...
+Building dependency tree...
+Reading state information...
+tmux is already the newest version (3.4-1ubuntu0.1).
+git is already the newest version (1:2.43.0-1ubuntu7.3).
+neovim is already the newest version (0.9.5-6ubuntu2).
+fzf is already the newest version (0.44.1-1ubuntu0.3).
+zoxide is already the newest version (0.9.3-1).
+ripgrep is already the newest version (14.1.0-1).
+fd-find is already the newest version (9.0.0-1).
+jq is already the newest version (1.7.1-3ubuntu0.24.04.2).
+The following packages were automatically installed and are no longer required:
+  libgit2-1.7 libhttp-parser2.9 libllvm17t64 libssh2-1t64 libstd-rust-1.75
+  libstd-rust-dev
+Use 'sudo apt autoremove' to remove them.
+0 upgraded, 0 newly installed, 0 to remove and 50 not upgraded.
+zsh ready. Restart your shell.
+Already installed "tpm"
+Already installed "tmux-sensible"
+Already installed "tmux-resurrect"
+Already installed "tmux"
+tmux ready.
+nvim ready. First launch will install plugins automatically.
+vim ready.
+Done. Restart your shell.
