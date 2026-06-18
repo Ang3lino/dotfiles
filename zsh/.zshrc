@@ -29,7 +29,9 @@ if command -v kubectl &>/dev/null; then
 fi
 
 # Prompt
-eval "$(starship init zsh)"
+if command -v starship &>/dev/null; then
+  eval "$(starship init zsh)"
+fi
 
 # Navigation
 eval "$(zoxide init zsh)"
