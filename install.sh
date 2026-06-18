@@ -56,5 +56,6 @@ fi
 "$SCRIPT_DIR/zsh/install.sh"
 "$SCRIPT_DIR/tmux/install.sh"
 "$SCRIPT_DIR/nvim/install.sh"
+"$SCRIPT_DIR/vim/install.sh"
 
 echo "Done. Restart your shell."
