@@ -1,0 +1,19 @@
+temis@MDC-FT9YYB4:/mnt/c/Users/amanriquez/Documents/repos/dotfiles$ ./install.sh --mimimal > minimal.log
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+curl: (60) SSL certificate problem: unable to get local issuer certificate
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+curl: (60) SSL certificate problem: unable to get local issuer certificate
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+unknown variable: TMUX_PLUGIN_MANAGER_PATH
+FATAL: Tmux Plugin Manager not configured in tmux.conf
+Aborting.
