@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+git clone --depth=1 https://github.com/amix/vimrc.git ~/.vim_runtime 2>/dev/null || {
+  if [ -d ~/.vim_runtime ]; then
+    echo "vim_runtime already installed."
+  else
+    echo "WARN: vimrc clone failed (SSL/network?). Vim works without it."
+    exit 0
+  fi
+}
 
-PACK_DIR="$HOME/.vim/pack/plugins/start/vim-sensible"
-if [ ! -d "$PACK_DIR" ]; then
-  git clone --depth 1 https://github.com/tpope/vim-sensible "$PACK_DIR" || echo "WARN: vim-sensible clone failed (SSL/network?). Vim works without it."
-fi
-
-ln -sf "$SCRIPT_DIR/.vimrc" "$HOME/.vimrc"
+sh ~/.vim_runtime/install_basic_vimrc.sh
 
 echo "vim ready."
