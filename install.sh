@@ -10,10 +10,10 @@ if command -v brew &>/dev/null; then
   if $MINIMAL; then
     brew install tmux neovim fzf zoxide ripgrep fd jq
   else
-    brew install tmux starship neovim lazygit fzf zoxide ripgrep fd jq
+    brew install tmux starship neovim lazygit fzf zoxide ripgrep fd jq awscli terraform
   fi
 elif command -v apt &>/dev/null; then
-  sudo apt install -y zsh tmux git neovim fzf zoxide ripgrep fd-find jq
+  sudo apt install -y zsh tmux git neovim fzf zoxide ripgrep fd-find jq unzip
   if ! $MINIMAL; then
     # starship: apt first, curl fallback
     if ! command -v starship &>/dev/null; then
@@ -33,9 +33,21 @@ elif command -v apt &>/dev/null; then
         echo "WARN: lazygit install failed (SSL/network?). Install manually."
       fi
     fi
+    # aws cli
+    if ! command -v aws &>/dev/null; then
+      curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
+      unzip -qo /tmp/awscliv2.zip -d /tmp && sudo /tmp/aws/install || echo "WARN: AWS CLI install failed."
+      rm -rf /tmp/awscliv2.zip /tmp/aws
+    fi
+    # terraform
+    if ! command -v terraform &>/dev/null; then
+      wget -qO- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg 2>/dev/null
+      echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list > /dev/null
+      sudo apt update -qq && sudo apt install -y terraform || echo "WARN: terraform install failed."
+    fi
   fi
 elif command -v dnf &>/dev/null; then
-  sudo dnf install -y zsh tmux git neovim fzf zoxide ripgrep fd-find jq
+  sudo dnf install -y zsh tmux git neovim fzf zoxide ripgrep fd-find jq unzip
   if ! $MINIMAL; then
     # starship: dnf first, curl fallback
     if ! command -v starship &>/dev/null; then
@@ -48,6 +60,18 @@ elif command -v dnf &>/dev/null; then
     # lazygit
     if ! command -v lazygit &>/dev/null; then
       sudo dnf copr enable -y atim/lazygit && sudo dnf install -y lazygit || echo "WARN: lazygit install failed. Install manually."
+    fi
+    # aws cli
+    if ! command -v aws &>/dev/null; then
+      curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
+      unzip -qo /tmp/awscliv2.zip -d /tmp && sudo /tmp/aws/install || echo "WARN: AWS CLI install failed."
+      rm -rf /tmp/awscliv2.zip /tmp/aws
+    fi
+    # terraform
+    if ! command -v terraform &>/dev/null; then
+      sudo dnf install -y dnf-plugins-core
+      sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/fedora/hashicorp.repo
+      sudo dnf install -y terraform || echo "WARN: terraform install failed."
     fi
   fi
 fi
