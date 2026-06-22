@@ -19,13 +19,4 @@ for skill in "$SCRIPT_DIR"/skills/*/; do
   ln -sf "$skill" "$HOME/.agents/skills/$skill_name"
 done
 
-if ! command -v cargo &>/dev/null; then
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y || echo "WARN: rustup install failed."
-  source "$HOME/.cargo/env" 2>/dev/null || true
-fi
-
-if command -v cargo &>/dev/null && ! command -v codegraph &>/dev/null; then
-  cargo install --git https://github.com/websines/codegraph-mcp.git || echo "WARN: codegraph build failed."
-fi
-
 echo "opencode ready."
