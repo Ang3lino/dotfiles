@@ -57,6 +57,7 @@ fi
 "$SCRIPT_DIR/tmux/install.sh"
 "$SCRIPT_DIR/nvim/install.sh"
 "$SCRIPT_DIR/vim/install.sh"
+"$SCRIPT_DIR/opencode/install.sh"
 
 if command -v zsh &>/dev/null && [ "$SHELL" != "$(which zsh)" ]; then
   chsh -s "$(which zsh)"
