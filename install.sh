@@ -13,7 +13,7 @@ if command -v brew &>/dev/null; then
     brew install tmux starship neovim lazygit fzf zoxide ripgrep fd jq
   fi
 elif command -v apt &>/dev/null; then
-  sudo apt install -y tmux git neovim fzf zoxide ripgrep fd-find jq
+  sudo apt install -y zsh tmux git neovim fzf zoxide ripgrep fd-find jq
   if ! $MINIMAL; then
     # starship: apt first, curl fallback
     if ! command -v starship &>/dev/null; then
@@ -35,7 +35,7 @@ elif command -v apt &>/dev/null; then
     fi
   fi
 elif command -v dnf &>/dev/null; then
-  sudo dnf install -y tmux git neovim fzf zoxide ripgrep fd-find jq
+  sudo dnf install -y zsh tmux git neovim fzf zoxide ripgrep fd-find jq
   if ! $MINIMAL; then
     # starship: dnf first, curl fallback
     if ! command -v starship &>/dev/null; then
@@ -57,5 +57,9 @@ fi
 "$SCRIPT_DIR/tmux/install.sh"
 "$SCRIPT_DIR/nvim/install.sh"
 "$SCRIPT_DIR/vim/install.sh"
+
+if command -v zsh &>/dev/null && [ "$SHELL" != "$(which zsh)" ]; then
+  chsh -s "$(which zsh)"
+fi
 
 echo "Done. Restart your shell."
