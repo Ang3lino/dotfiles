@@ -14,6 +14,12 @@ HISTSIZE=10000
 SAVEHIST=10000
 setopt share_history hist_ignore_dups hist_ignore_space
 
+# Show exit code when a command fails — without this, failed commands
+# (e.g. `sudo apt install <unknown-pkg>`) can appear to produce no output
+# because apt sends errors to stderr, which is easy to miss when the
+# prompt redraws. print_exit_value ensures zsh prints the exit status.
+setopt print_exit_value
+
 # Aliases
 alias ll='ls -la'
 alias g='git'
