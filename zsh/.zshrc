@@ -43,3 +43,5 @@ fi
 
 # Navigation
 eval "$(zoxide init zsh)"
+
+[[ -f ~/.secrets ]] && source ~/.secrets
