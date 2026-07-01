@@ -12,6 +12,12 @@ function Install-WinGet($id) {
     }
 }
 
+# PowerShell 7 (MSIX — Install-WinGet doesn't work for this package)
+winget install --id Microsoft.PowerShell --source winget --accept-source-agreements --accept-package-agreements
+
+# Windows Terminal
+Install-WinGet "Microsoft.WindowsTerminal"
+
 # Core tools (always)
 Install-WinGet "Neovim.Neovim"
 Install-WinGet "junegunn.fzf"
@@ -21,7 +27,7 @@ Install-WinGet "jqlang.jq"
 Install-WinGet "ajeetdsouza.zoxide"
 
 if (-not $Minimal) {
-    Install-WinGet "Starship.Starship"
+    Install-WinGet "JanDeDobbeleer.OhMyPosh"
     Install-WinGet "JesseDuffield.lazygit"
     Install-WinGet "Amazon.AWSCLI"
     Install-WinGet "Hashicorp.Terraform"
