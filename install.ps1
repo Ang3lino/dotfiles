@@ -25,6 +25,7 @@ Install-WinGet "BurntSushi.ripgrep.MSVC"
 Install-WinGet "sharkdp.fd"
 Install-WinGet "jqlang.jq"
 Install-WinGet "ajeetdsouza.zoxide"
+Install-WinGet "astral-sh.uv"
 
 if (-not $Minimal) {
     Install-WinGet "JanDeDobbeleer.OhMyPosh"
