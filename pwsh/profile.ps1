@@ -1,4 +1,5 @@
 # PowerShell profile — oh-my-posh, aliases, zoxide, secrets
+# Idempotent: safe to source multiple times (all blocks guard with Get-Command/Get-Module)
 # Symlinked to $PROFILE by pwsh/install.ps1
 
 # Secrets (never committed)
@@ -10,11 +11,6 @@ Set-Alias -Name g -Value git
 Set-Alias -Name v -Value nvim
 Set-Alias -Name k -Value kubectl
 function ll { Get-ChildItem -Force @args }
-
-# Zoxide
-if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    Invoke-Expression (& { (zoxide init powershell | Out-String) })
-}
 
 # PSReadLine — predictive IntelliSense & history search
 if (Get-Module -ListAvailable -Name PSReadLine) {
@@ -38,3 +34,10 @@ if (Get-Command oh-my-posh -ErrorAction SilentlyContinue) {
 } else {
     function prompt { "PS $($executionContext.SessionState.Path.CurrentLocation)> " }
 }
+
+# Zoxide — MUST be after oh-my-posh so its prompt hook isn't overwritten
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+    Invoke-Expression (& { (zoxide init powershell | Out-String) })
+}
+
+if ($env:TERM_PROGRAM -eq "kiro") { . "$(kiro --locate-shell-integration-path pwsh)" }
