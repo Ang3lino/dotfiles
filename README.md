@@ -22,6 +22,17 @@ cd $env:USERPROFILE\dotfiles
 
 `--minimal` skips starship, lazygit, AWS CLI, and terraform on both platforms.
 
+Selective install — pick only what you need:
+
+```bash
+./install.sh zsh nvim          # just zsh + neovim configs
+./install.sh tmux              # just tmux
+./install.sh --minimal zsh     # zsh without extras
+./install.sh deps              # system packages only, no configs
+```
+
+Components: `deps`, `zsh`, `tmux`, `nvim`, `vim`, `opencode`. No args = everything.
+
 ## What's included
 
 | Tool | Config | Linux/macOS | Windows |

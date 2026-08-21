@@ -4,8 +4,19 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MINIMAL=false
-[[ "${1:-}" == "--minimal" ]] && MINIMAL=true
+COMPONENTS=()
 
+for arg in "$@"; do
+  case "$arg" in
+    --minimal) MINIMAL=true ;;
+    *) COMPONENTS+=("$arg") ;;
+  esac
+done
+
+# ponytail: empty = all components
+should_install() { [[ ${#COMPONENTS[@]} -eq 0 ]] || [[ " ${COMPONENTS[*]} " == *" $1 "* ]]; }
+
+if should_install deps; then
 if command -v brew &>/dev/null; then
   if $MINIMAL; then
     brew install tmux neovim fzf zoxide ripgrep fd jq
@@ -47,6 +58,8 @@ elif command -v apt &>/dev/null; then
     fi
   fi
 elif command -v dnf &>/dev/null; then
+  # ponytail: dnf-plugins-core first — copr and config-manager need it
+  sudo dnf install -y dnf-plugins-core 2>/dev/null || sudo dnf install -y 'dnf5-command(copr)' 'dnf5-command(config-manager)' 2>/dev/null || true
   sudo dnf install -y zsh tmux git neovim fzf zoxide ripgrep fd-find jq unzip
   if ! $MINIMAL; then
     # starship: dnf first, curl fallback
@@ -69,21 +82,18 @@ elif command -v dnf &>/dev/null; then
     fi
     # terraform
     if ! command -v terraform &>/dev/null; then
-      sudo dnf install -y dnf-plugins-core
-      sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/fedora/hashicorp.repo
+      sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/fedora/hashicorp.repo 2>/dev/null || sudo dnf config-manager addrepo --from-repofile=https://rpm.releases.hashicorp.com/fedora/hashicorp.repo 2>/dev/null || true
       sudo dnf install -y terraform || echo "WARN: terraform install failed."
     fi
   fi
 fi
+fi
 
-# Run sub-installers
-"$SCRIPT_DIR/zsh/install.sh"
-"$SCRIPT_DIR/tmux/install.sh"
-"$SCRIPT_DIR/nvim/install.sh"
-"$SCRIPT_DIR/vim/install.sh"
-"$SCRIPT_DIR/opencode/install.sh"
+for component in zsh tmux nvim vim opencode; do
+  should_install "$component" && "$SCRIPT_DIR/$component/install.sh"
+done
 
-if command -v zsh &>/dev/null && [ "$SHELL" != "$(which zsh)" ]; then
+if should_install zsh && command -v zsh &>/dev/null && [ "$SHELL" != "$(which zsh)" ]; then
   chsh -s "$(which zsh)"
 fi
 
