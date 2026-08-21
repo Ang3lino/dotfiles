@@ -3,37 +3,39 @@
 ## Repo structure
 
 ```
-install.sh          # Top-level installer (runs sub-installers)
-zsh/install.sh      # Symlinks .zshrc + starship.toml, installs znap
-tmux/install.sh     # Symlinks tmux.conf, installs tpm + plugins
-nvim/install.sh     # Symlinks nvim/ → ~/.config/nvim (LazyVim)
+install.sh          # Top-level installer (deps + stow + bootstrap)
+zsh/.zshrc          # → ~/.zshrc (via stow)
+zsh/.config/        # → ~/.config/starship.toml (via stow)
+tmux/.tmux.conf     # → ~/.tmux.conf (via stow)
+nvim/.config/nvim/  # → ~/.config/nvim/ (via stow, LazyVim)
+opencode/.config/opencode/  # → ~/.config/opencode/ (via stow)
+opencode/.agents/skills/    # → ~/.agents/skills/ (via stow)
 ```
-
-Each tool gets its own directory with an `install.sh` that is idempotent and OS-aware (brew/apt/dnf).
 
 ## Conventions
 
+- GNU Stow manages all symlinks. Each top-level dir is a stow package targeting `$HOME`.
 - Shell scripts use `#!/usr/bin/env bash`, `set -e`, and resolve `SCRIPT_DIR` for portability.
-- System packages are installed in the root `install.sh`; sub-installers handle tool-specific setup only.
-- Config files are symlinked into place (`ln -sf`), never copied.
-- Plugin managers bootstrap themselves if missing (znap, tpm, lazy.nvim).
+- System packages are installed in the root `install.sh`; stow handles config placement.
+- Plugin managers bootstrap post-stow (znap, tpm, lazy.nvim).
 - `.gitignore` excludes cloned plugin dirs (`znap/`, `zsh-users/`).
 
 ## Commands
 
 ```bash
-./install.sh              # Full setup (deps + all sub-installers)
-./zsh/install.sh          # Just zsh config
-./tmux/install.sh         # Just tmux config
-./nvim/install.sh         # Just nvim config
+./install.sh              # Full setup (deps + all components)
+./install.sh zsh nvim     # Selective: only zsh + nvim
+./install.sh --minimal    # Skip starship, lazygit, AWS, terraform
+./install.sh deps         # System packages only
 ```
 
 ## Adding a new tool
 
-1. Add system package to `install.sh` (all three package managers).
-2. If it needs shell init, add `eval "$(tool init zsh)"` to `zsh/.zshrc`.
-3. If it needs its own config dir, create `tool/install.sh` following existing pattern and call it from root `install.sh`.
+1. Create `tool/.config/tool/` mirroring target path relative to `$HOME`.
+2. Add system package to `install.sh` (all three package managers).
+3. Add `tool` to the stow loop in `install.sh`.
+4. If it needs shell init, add `eval "$(tool init zsh)"` to `zsh/.zshrc`.
 
 ## Neovim
 
-LazyVim-based config. `nvim/` is symlinked wholesale to `~/.config/nvim`. Plugins auto-install on first launch. Lua formatting uses stylua (`nvim/stylua.toml`).
+LazyVim-based config in `nvim/.config/nvim/`. Plugins auto-install on first launch. Lua formatting uses stylua.

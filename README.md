@@ -20,18 +20,18 @@ cd $env:USERPROFILE\dotfiles
 .\install.ps1
 ```
 
-`--minimal` skips starship, lazygit, AWS CLI, and terraform on both platforms.
-
-Selective install — pick only what you need:
+### Options
 
 ```bash
-./install.sh zsh nvim          # just zsh + neovim configs
-./install.sh tmux              # just tmux
-./install.sh --minimal zsh     # zsh without extras
+./install.sh                   # everything
+./install.sh zsh nvim          # just zsh + neovim
+./install.sh --minimal zsh     # zsh without extras (no starship, lazygit, aws, terraform)
 ./install.sh deps              # system packages only, no configs
 ```
 
-Components: `deps`, `zsh`, `tmux`, `nvim`, `vim`, `opencode`. No args = everything.
+Components: `deps`, `zsh`, `tmux`, `nvim`, `opencode`. No args = everything.
+
+Uses GNU Stow for symlinks — each top-level dir mirrors `$HOME`.
 
 ## What's included
 
