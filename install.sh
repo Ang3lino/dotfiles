@@ -73,8 +73,23 @@ elif command -v dnf &>/dev/null; then
 fi
 fi
 
+# --- Pre-stow cleanup: remove stale symlinks and blocking dirs ---
+for f in "$HOME/.zshrc" "$HOME/.tmux.conf" "$HOME/.config/starship.toml" "$HOME/.config/nvim" \
+         "$HOME/.config/opencode/opencode.jsonc" "$HOME/.config/opencode/oh-my-openagent.json"; do
+  if [ -L "$f" ]; then
+    target="$(readlink "$f")"
+    case "$target" in
+      "$SCRIPT_DIR"*) ;;
+      *) echo "Removing stale symlink: $f -> $target"; rm -f "$f" ;;
+    esac
+  fi
+done
+for d in "$HOME/.agents/skills" "$HOME/.config/opencode/commands"; do
+  [ -d "$d" ] && [ ! -L "$d" ] && echo "Removing blocking dir: $d" && rm -rf "$d"
+done
+mkdir -p "$HOME/.config/opencode" "$HOME/.agents"
+
 # --- Stow packages ---
-# ponytail: stow replaces all manual ln -sf logic
 for pkg in zsh tmux nvim opencode; do
   if should_install "$pkg"; then
     stow -v --target="$HOME" --adopt --restow "$pkg" 2>&1 | grep -v "BUG" || true

@@ -1,7 +1,8 @@
 # ponytail: minimal zshrc — starship + 3 plugins via znap
-# Source znap plugin manager
-[[ -r ~/dotfiles/zsh/znap/znap.zsh ]] || git clone --depth 1 https://github.com/marlonrichert/zsh-snap ~/dotfiles/zsh/znap
-source ~/dotfiles/zsh/znap/znap.zsh
+# ponytail: resolve znap location from wherever .zshrc symlink points
+ZSHRC_DIR="$(cd "$(dirname "$(readlink -f ~/.zshrc)")" && pwd)"
+[[ -r "$ZSHRC_DIR/znap/znap.zsh" ]] || git clone --depth 1 https://github.com/marlonrichert/zsh-snap "$ZSHRC_DIR/znap"
+source "$ZSHRC_DIR/znap/znap.zsh"
 
 # Plugins
 znap source zsh-users/zsh-autosuggestions
