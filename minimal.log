@@ -1,7 +1,7 @@
-Diagnostics saved to: /tmp/dotfiles-diag-20260824-224639.md
+Diagnostics saved to: /tmp/dotfiles-diag-20260824-224941.md
 
 # Dotfiles Diagnostics
-- Date: lun 24 ago 2026 22:46:39 CST
+- Date: lun 24 ago 2026 22:49:41 CST
 - OS: "Ubuntu 24.04.4 LTS"
 - Kernel: Linux ecorp 6.8.0-90-generic #91-Ubuntu SMP PREEMPT_DYNAMIC Tue Nov 18 14:14:30 UTC 2025 x86_64 x86_64 x86_64 GNU/Linux
 - Shell: /bin/bash
@@ -52,9 +52,9 @@ Python 3.12.3
 3.45.1 2024-01-30 16:01:20 e876e51a0ed5c5b3126f52e532044363a014bc594cfefa87ffb5b82257ccalt1 (64-bit)
 
 ## Stow symlinks
-- /home/arcangel/.zshrc                    EXISTS (not a symlink!)
+- /home/arcangel/.zshrc                    -> /home/arcangel/Documents/repos/dotfiles/zsh/.zshrc
 - /home/arcangel/.tmux.conf                -> /home/arcangel/dotfiles/.tmux.conf
-- /home/arcangel/.config/starship.toml     MISSING
+- /home/arcangel/.config/starship.toml     -> /home/arcangel/Documents/repos/dotfiles/zsh/.config/starship.toml
 - /home/arcangel/.config/nvim              -> /home/arcangel/dotfiles/.config/nvim
 - /home/arcangel/.config/opencode/opencode.jsonc -> /home/arcangel/Documents/repos/dotfiles/opencode/.config/opencode/opencode.jsonc
 - /home/arcangel/.agents/skills            EXISTS (not a symlink!)
@@ -88,7 +88,7 @@ set -g mode-keys vi
 
 ## Starship status
 - installed: starship 1.26.0
-- config: MISSING
+- config: present
 
 ## OpenCode status
 - binary: /home/linuxbrew/.linuxbrew/bin/opencode
