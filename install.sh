@@ -16,7 +16,8 @@ should_install() { [[ ${#COMPONENTS[@]} -eq 0 ]] || [[ " ${COMPONENTS[*]} " == *
 
 # --- System packages ---
 if should_install deps; then
-if command -v brew &>/dev/null; then
+# ponytail: brew only on macOS — apt/dnf preferred on Linux even if brew exists
+if [[ "$(uname)" == "Darwin" ]] && command -v brew &>/dev/null; then
   brew install stow
   if $MINIMAL; then
     brew install tmux neovim fzf zoxide ripgrep fd jq
