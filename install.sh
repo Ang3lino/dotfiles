@@ -77,9 +77,10 @@ fi
 # ponytail: stow replaces all manual ln -sf logic
 for pkg in zsh tmux nvim opencode; do
   if should_install "$pkg"; then
-    stow -v --target="$HOME" --restow "$pkg" 2>&1 | grep -v "BUG" || true
+    stow -v --target="$HOME" --adopt --restow "$pkg" 2>&1 | grep -v "BUG" || true
   fi
 done
+# ponytail: --adopt takes ownership of existing files, then --restow replaces them with symlinks
 
 # --- Post-stow bootstrap (plugins that need cloning) ---
 if should_install zsh; then
