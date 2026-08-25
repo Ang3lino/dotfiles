@@ -5,6 +5,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MINIMAL=false
 COMPONENTS=()
 
+# ponytail: keep sudo alive throughout install — prevents repeated password prompts
+if [[ "$(uname)" != "Darwin" ]]; then
+  sudo -v
+  while true; do sudo -n true; sleep 50; kill -0 "$$" || exit; done 2>/dev/null &
+fi
+
 for arg in "$@"; do
   case "$arg" in
     --minimal) MINIMAL=true ;;
