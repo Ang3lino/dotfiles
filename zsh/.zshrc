@@ -4,6 +4,23 @@ ZSHRC_DIR="$(cd "$(dirname "$(readlink -f ~/.zshrc)")" && pwd)"
 [[ -r "$ZSHRC_DIR/znap/znap.zsh" ]] || git clone --depth 1 https://github.com/marlonrichert/zsh-snap "$ZSHRC_DIR/znap"
 source "$ZSHRC_DIR/znap/znap.zsh"
 
+# PATH — zsh never sources /etc/profile (there is no /etc/zprofile), so unlike
+# bash it inherits nothing from ~/.bashrc. Set the user bin dirs explicitly here
+# or tools installed under $HOME (opencode, zed, kiro-cli) resolve only in bash.
+# typeset -U keeps repeated zsh assignments from stacking duplicate entries.
+typeset -U path
+path=(
+  "$HOME/.opencode/bin"
+  "$HOME/.local/bin"
+  "$HOME/bin"
+  $path
+)
+
+# nvm — without this zsh silently falls back to the system /bin/node, which can
+# differ from the version bash uses.
+export NVM_DIR="$HOME/.nvm"
+[[ -s "$NVM_DIR/nvm.sh" ]] && source "$NVM_DIR/nvm.sh"
+
 # Plugins
 znap source zsh-users/zsh-autosuggestions
 znap source zsh-users/zsh-syntax-highlighting

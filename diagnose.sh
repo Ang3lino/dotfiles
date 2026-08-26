@@ -80,8 +80,36 @@ else
 fi
 echo ""
 
+echo "## Login shell PATH parity"
+# $SHELL is unreliable: /etc/bashrc unconditionally sets SHELL=/bin/bash, so a
+# bash subshell launched from zsh reports the wrong shell. Installers that key
+# off $SHELL then write their PATH export to the wrong rc file. Probe the real
+# login shell from passwd, in a clean env so nothing leaks in from this script.
+# ponytail: getent is glibc-only; macOS falls back to dscl, then $SHELL.
+LOGIN_SHELL="$(getent passwd "$USER" 2>/dev/null | cut -d: -f7)"
+[ -z "$LOGIN_SHELL" ] && LOGIN_SHELL="$(dscl . -read "/Users/$USER" UserShell 2>/dev/null | awk '{print $2}')"
+[ -z "$LOGIN_SHELL" ] && LOGIN_SHELL="$SHELL"
+echo "- passwd login shell: ${LOGIN_SHELL:-unknown}"
+echo "- \$SHELL (may be stale): $SHELL"
+[ "$LOGIN_SHELL" != "$SHELL" ] && echo "  NOTE: \$SHELL disagrees with passwd; trust passwd"
+if [ -x "$LOGIN_SHELL" ]; then
+  echo "- resolved in a clean login shell:"
+  for bin in opencode node npm zed starship zoxide; do
+    found="$(env -i HOME="$HOME" USER="$USER" TERM=dumb "$LOGIN_SHELL" -lic \
+      "command -v $bin" 2>/dev/null | tr -d '\r')"
+    printf -- "  - %-10s %s\n" "$bin:" "${found:-NOT ON PATH}"
+  done
+  echo "- clean login PATH:"
+  env -i HOME="$HOME" USER="$USER" TERM=dumb "$LOGIN_SHELL" -lic 'print -l $path' \
+    2>/dev/null | sed 's/^/  - /'
+else
+  echo "- cannot execute login shell, skipping"
+fi
+echo ""
+
 echo "## OpenCode status"
 command -v opencode &>/dev/null && echo "- binary: $(which opencode)" || echo "- binary: NOT INSTALLED"
+echo "  (above reflects THIS shell only; see PATH parity section for login shell)"
 [ -f ~/.config/opencode/opencode.jsonc ] && echo "- config: present" || echo "- config: MISSING"
 [ -f ~/.config/opencode/oh-my-openagent.json ] && echo "- oh-my-openagent: present" || echo "- oh-my-openagent: MISSING"
 echo ""

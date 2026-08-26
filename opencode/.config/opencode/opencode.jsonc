@@ -1,18 +1,12 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  // Versions are pinned deliberately: "@latest" forces an npm registry
+  // round-trip on every single startup.
+  // NOTE: the bare name "ponytail" on npm is an UNRELATED 2019 package
+  // ("Rethinking maintenance of multiple sites"). The real plugin is the
+  // scoped @dietrichgebert/ponytail (keywords: opencode-plugin).
   "plugin": [
-    "oh-my-openagent@latest",
-    "ponytail@latest"
-  ],
-  "mcp": {
-    "codegraph": {
-      "type": "local",
-      "command": [
-        "codegraph",
-        "serve",
-        "--mcp"
-      ],
-      "enabled": true
-    }
-  }
+    "oh-my-openagent@4.19.4",
+    "@dietrichgebert/ponytail@4.9.0"
+  ]
 }

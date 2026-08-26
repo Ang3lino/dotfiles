@@ -83,7 +83,12 @@ fi
 for f in "$HOME/.zshrc" "$HOME/.tmux.conf" "$HOME/.config/starship.toml" "$HOME/.config/nvim" \
          "$HOME/.config/opencode/opencode.jsonc" "$HOME/.config/opencode/oh-my-openagent.json"; do
   if [ -L "$f" ]; then
-    target="$(readlink "$f")"
+    # readlink -f (not plain readlink): stow writes RELATIVE targets like
+    # ../../Documents/repos/dotfiles/..., which never match an absolute
+    # $SCRIPT_DIR prefix. Plain readlink made this guard delete every link on
+    # every run. -f resolves to an absolute path, and also follows the extra
+    # hop for oh-my-openagent.json -> oh-my-openagent.<profile>.json.
+    target="$(readlink -f "$f")"
     case "$target" in
       "$SCRIPT_DIR"*) ;;
       *) echo "Removing stale symlink: $f -> $target"; rm -f "$f" ;;
@@ -98,10 +103,17 @@ mkdir -p "$HOME/.config/opencode" "$HOME/.agents"
 # --- Stow packages ---
 for pkg in zsh tmux nvim opencode; do
   if should_install "$pkg"; then
-    stow -v --target="$HOME" --adopt --restow "$pkg" 2>&1 | grep -v "BUG" || true
+    stow -v --target="$HOME" --restow "$pkg" 2>&1 | grep -v "BUG" || true
   fi
 done
-# ponytail: --adopt takes ownership of existing files, then --restow replaces them with symlinks
+# NOTE: --adopt is deliberately NOT used. man stow: "This behaviour is
+# specifically intended to alter the contents of your stow directory." When a
+# target is a plain file, stow MOVES it into the repo, overwriting the tracked
+# version. It silently gutted opencode.jsonc once (dropped the whole plugin
+# array, so oh-my-openagent never loaded) and would also flatten the
+# oh-my-openagent.json -> <profile> symlink back into a plain file.
+# If a real file blocks a link, stow now fails loudly instead. Resolve it by
+# hand: inspect the file, then delete it once you've confirmed the repo copy.
 
 # --- Post-stow bootstrap (plugins that need cloning) ---
 if should_install zsh; then

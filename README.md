@@ -69,9 +69,59 @@ Both shells source these automatically on startup.
 | Addon | What it does | Source |
 |-------|-------------|--------|
 | [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent) | Agent orchestration, model routing, fallback chains | Plugin |
-| [ponytail](https://github.com/gkwa/ponytail) | Lazy senior dev mode — YAGNI enforcement | Plugin + commands |
+| [@dietrichgebert/ponytail](https://github.com/DietrichGebert/ponytail) | Lazy senior dev mode — YAGNI enforcement | Plugin + commands |
 | brainstorming | Intent/requirements exploration before implementation | Skill |
 | find-skills | Discover and install agent skills | Skill |
+
+### Switching agent model profiles
+
+`oh-my-openagent` reads exactly one filename: `~/.config/opencode/oh-my-openagent.json`.
+In this repo that name is a **symlink to a profile preset**, so switching providers
+is a one-line change.
+
+| Preset | Providers used |
+|--------|----------------|
+| `oh-my-openagent.bedrock.json` | `amazon-bedrock` only — **currently active** |
+| `oh-my-openagent.github-copilot.json` | `github-copilot` only |
+| `oh-my-openagent.opencode-go.json` | `opencode-go` only |
+| `oh-my-openagent.mixed.json` | All three, with `fallback_models` chains |
+
+To switch, re-point the symlink **inside the repo** (not in `~/.config`):
+
+```bash
+cd opencode/.config/opencode
+ln -sfn oh-my-openagent.github-copilot.json oh-my-openagent.json
+```
+
+Confirm which preset is live, and that it parses through both symlink hops:
+
+```bash
+readlink -f ~/.config/opencode/oh-my-openagent.json
+jq -e . ~/.config/opencode/oh-my-openagent.json >/dev/null && echo OK
+```
+
+List every provider the active profile references — useful for catching a stray
+`github-copilot` entry when you meant Bedrock only:
+
+```bash
+jq -r '[.agents[].model, .categories[].model] | map(split("/")[0]) | unique | .[]' \
+  ~/.config/opencode/oh-my-openagent.json
+```
+
+Restart opencode to pick up the change.
+
+**You do not need to re-run `stow` for this.** `~/.config/opencode/oh-my-openagent.json`
+already points into the repo, so editing repo content — including re-pointing the
+profile symlink — is live immediately. Re-stow only when you **add or remove a
+file**, since only then does the set of required links change:
+
+```bash
+stow -n -v --target="$HOME" --restow opencode   # dry run first
+stow    -v --target="$HOME" --restow opencode
+```
+
+Never pass `--adopt`. It moves files from `$HOME` *into* the repo, overwriting
+tracked content, and will flatten the profile symlink into a plain file.
 
 ### Related projects
 
