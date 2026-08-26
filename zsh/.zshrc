@@ -13,6 +13,8 @@ path=(
   "$HOME/.opencode/bin"
   "$HOME/.local/bin"
   "$HOME/bin"
+  /usr/local/bin
+  /usr/local/sbin
   $path
 )
 
