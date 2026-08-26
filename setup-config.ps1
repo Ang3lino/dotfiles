@@ -69,6 +69,16 @@ if ($Force -or -not (Test-Path "$ocDir\node_modules")) {
     }
 }
 
+# OpenCode (global npm tool)
+if ($Force -or -not (Get-Command opencode -ErrorAction SilentlyContinue)) {
+    if (Get-Command npm -ErrorAction SilentlyContinue) {
+        Write-Host "Installing opencode..."
+        npm install -g @nicepkg/opencode 2>$null
+    } else {
+        Write-Host "WARN: npm not found - skip opencode install."
+    }
+}
+
 # Bash (Git Bash)
 Link-Item "$ScriptDir\bash\.bashrc" "$env:USERPROFILE\.bashrc"
 
