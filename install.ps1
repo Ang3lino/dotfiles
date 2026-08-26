@@ -29,6 +29,7 @@ Install-WinGet "sharkdp.fd"
 Install-WinGet "jqlang.jq"
 Install-WinGet "ajeetdsouza.zoxide"
 Install-WinGet "astral-sh.uv"
+Install-WinGet "GitHub.cli"
 Install-WinGet "9P5PK6TVQXF7" # Charmy — hot corners for Windows
 
 if (-not $Minimal) {
