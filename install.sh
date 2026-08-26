@@ -115,6 +115,17 @@ done
 # If a real file blocks a link, stow now fails loudly instead. Resolve it by
 # hand: inspect the file, then delete it once you've confirmed the repo copy.
 
+# --- Fix oh-my-openagent.json if git checked it out as a stub (core.symlinks=false) ---
+_agent="$HOME/.config/opencode/oh-my-openagent.json"
+if [ -f "$_agent" ] && [ ! -L "$_agent" ] && [ "$(wc -l < "$_agent")" -eq 1 ]; then
+  _target="$(cat "$_agent" | tr -d '[:space:]')"
+  if [ -f "$SCRIPT_DIR/opencode/.config/opencode/$_target" ]; then
+    rm -f "$_agent"
+    ln -s "$SCRIPT_DIR/opencode/.config/opencode/$_target" "$_agent"
+    echo "Fixed oh-my-openagent.json stub -> $_target"
+  fi
+fi
+
 # --- Post-stow bootstrap (plugins that need cloning) ---
 if should_install zsh; then
   if ! command -v starship &>/dev/null; then

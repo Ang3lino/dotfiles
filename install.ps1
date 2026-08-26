@@ -3,17 +3,20 @@
 $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Minimal = $args -contains "--minimal"
+$Force = $args -contains "--force"
 
 function Install-WinGet($id) {
-    $installed = winget list --id $id 2>$null | Select-String $id
-    if (-not $installed) {
-        Write-Host "Installing $id..."
-        winget install --id $id --accept-source-agreements --accept-package-agreements -e
+    if (-not $Force) {
+        $installed = winget list --id $id 2>$null | Select-String $id
+        if ($installed) { return }
     }
+    Write-Host "Installing $id..."
+    winget install --id $id --accept-source-agreements --accept-package-agreements -e 2>$null
+    if ($LASTEXITCODE -ne 0) { Write-Host "  WARN: $id install returned exit code $LASTEXITCODE" }
 }
 
-# PowerShell 7 (MSIX — Install-WinGet doesn't work for this package)
-winget install --id Microsoft.PowerShell --source winget --accept-source-agreements --accept-package-agreements
+# PowerShell 7
+Install-WinGet "Microsoft.PowerShell"
 
 # Windows Terminal
 Install-WinGet "Microsoft.WindowsTerminal"
@@ -36,37 +39,15 @@ if (-not $Minimal) {
 }
 
 # --- Sub-installers ---
-& "$ScriptDir\pwsh\install.ps1"
-
-# --- Symlink configs (replaces stow on Windows) ---
-function Link-Item($target, $link) {
-    if (Test-Path $link) { Remove-Item $link -Force -Recurse }
-    $parent = Split-Path -Parent $link
-    if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Force -Path $parent | Out-Null }
-    New-Item -ItemType SymbolicLink -Force -Path $link -Target $target | Out-Null
-    Write-Host "  $link -> $target"
+# Run under PowerShell 7 so $PROFILE resolves to the correct PS7 path
+$pwshExe = Get-Command pwsh -ErrorAction SilentlyContinue
+if ($pwshExe) {
+    & pwsh -NoProfile -File "$ScriptDir\pwsh\install.ps1"
+} else {
+    Write-Host "  pwsh not yet on PATH — skipping profile setup (re-run after restarting terminal)"
 }
 
-# Neovim
-Link-Item "$ScriptDir\nvim\.config\nvim" "$env:LOCALAPPDATA\nvim"
-
-# OpenCode config
-Link-Item "$ScriptDir\opencode\.config\opencode\opencode.jsonc" "$env:USERPROFILE\.config\opencode\opencode.jsonc"
-Link-Item "$ScriptDir\opencode\.config\opencode\oh-my-openagent.json" "$env:USERPROFILE\.config\opencode\oh-my-openagent.json"
-
-# OpenCode commands
-$cmdSrc = "$ScriptDir\opencode\.config\opencode\commands"
-$cmdDst = "$env:USERPROFILE\.config\opencode\commands"
-if (-not (Test-Path $cmdDst)) { New-Item -ItemType Directory -Force -Path $cmdDst | Out-Null }
-Get-ChildItem "$cmdSrc\*.md" | ForEach-Object {
-    Link-Item $_.FullName "$cmdDst\$($_.Name)"
-}
-
-# OpenCode skills
-Link-Item "$ScriptDir\opencode\.agents\skills\brainstorming" "$env:USERPROFILE\.agents\skills\brainstorming"
-Link-Item "$ScriptDir\opencode\.agents\skills\find-skills" "$env:USERPROFILE\.agents\skills\find-skills"
-
-# Bash (Git Bash)
-Link-Item "$ScriptDir\bash\.bashrc" "$env:USERPROFILE\.bashrc"
+# --- Config symlinks + plugins (delegates to setup-config.ps1) ---
+& "$ScriptDir\setup-config.ps1"
 
 Write-Host "Done. Restart your terminal."

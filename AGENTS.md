@@ -4,10 +4,12 @@
 
 ```
 install.sh          # Top-level installer (deps + stow + bootstrap)
+install.ps1         # Windows installer (winget + delegates to setup-config.ps1)
+setup-config.ps1    # Windows config-only (no admin: junctions/copies fallback)
 zsh/.zshrc          # → ~/.zshrc (via stow)
 zsh/.config/        # → ~/.config/starship.toml (via stow)
 tmux/.tmux.conf     # → ~/.tmux.conf (via stow)
-nvim/.config/nvim/  # → ~/.config/nvim/ (via stow, LazyVim)
+nvim/.config/nvim/  # → ~/.config/nvim/ (via stow) or %LOCALAPPDATA%\nvim (via symlink/junction)
 opencode/.config/opencode/  # → ~/.config/opencode/ (via stow)
 opencode/.agents/skills/    # → ~/.agents/skills/ (via stow)
 ```
@@ -23,6 +25,12 @@ opencode/.agents/skills/    # → ~/.agents/skills/ (via stow)
 - System packages are installed in the root `install.sh`; stow handles config placement.
 - Plugin managers bootstrap post-stow (znap, tpm, lazy.nvim).
 - `.gitignore` excludes cloned plugin dirs (`znap/`, `zsh-users/`).
+- On Windows, `setup-config.ps1` falls back to junctions (dirs) and copies (files) when
+  symlinks require admin. Copies are not live — re-run after repo edits. Enable Developer
+  Mode for real symlinks without elevation.
+- `oh-my-openagent.json` is a git symlink (mode `120000`). When `core.symlinks=false`
+  (Windows default), git checks it out as a plain text stub containing the target filename.
+  Both `install.ps1`/`setup-config.ps1` and `install.sh` detect and resolve the stub.
 - zsh gets no `/etc/profile` (no `/etc/zprofile` exists), so `PATH` must be set explicitly
   in `zsh/.zshrc`. Do not rely on `~/.bashrc` — zsh never reads it.
 - `$SHELL` is unreliable: `/etc/bashrc` hardcodes `SHELL=/bin/bash`. Read the login shell
@@ -76,6 +84,11 @@ echo 'precedence ::ffff:0:0/96  100' | sudo tee /etc/gai.conf
 ./install.sh zsh nvim     # Selective: only zsh + nvim
 ./install.sh --minimal    # Skip starship, lazygit, AWS, terraform
 ./install.sh deps         # System packages only
+```
+
+```powershell
+.\install.ps1             # Full setup (winget + config, requires admin)
+.\setup-config.ps1        # Config only (no admin needed)
 ```
 
 ## Adding a new tool
