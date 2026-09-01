@@ -55,6 +55,18 @@ The ponytail plugin is `@dietrichgebert/ponytail`. The bare npm name `ponytail` 
 **unrelated 2019 package** ("Rethinking maintenance of multiple sites") — do not use it.
 The `gkwa/ponytail` URL in older notes is a dead link.
 
+OpenCode itself is the npm package `opencode-ai`. `@nicepkg/opencode` does not exist
+on npm (404) — `setup-config.ps1` used to install it and silently failed.
+
+`opencode.jsonc` sets the **primary session model**; `oh-my-openagent.json` sets
+**per-agent and per-category routing**. They are independent. A third thing, the
+picker state in `~/.local/state/opencode/model.json`, wins over config for new
+sessions. A retired model ID in any of the three surfaces as a startup warning.
+
+OpenCode reads its config **once at process start**. Opening a new session inside a
+running process does not reload it, so config fixes appear not to work until every
+instance is quit.
+
 ## Known machine issue: broken IPv6
 
 This host gets a global IPv6 address and default route from router advertisement, but has
