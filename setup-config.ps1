@@ -15,9 +15,12 @@ function Link-Item($target, $link) {
     $parent = Split-Path -Parent $link
     if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Force -Path $parent | Out-Null }
     # Try symlink first; fall back to junction (dirs) or copy (files) if no admin
+    # Catch broadly: without Developer Mode / admin, Windows raises this as
+    # UnauthorizedAccessException OR IOException ("A required privilege is not
+    # held by the client") depending on PowerShell version.
     try {
         New-Item -ItemType SymbolicLink -Force -Path $link -Target $target -ErrorAction Stop | Out-Null
-    } catch [System.UnauthorizedAccessException] {
+    } catch {
         if (Test-Path $target -PathType Container) {
             cmd /c mklink /J "$link" "$target" | Out-Null
         } else {
@@ -73,7 +76,7 @@ if ($Force -or -not (Test-Path "$ocDir\node_modules")) {
 if ($Force -or -not (Get-Command opencode -ErrorAction SilentlyContinue)) {
     if (Get-Command npm -ErrorAction SilentlyContinue) {
         Write-Host "Installing opencode..."
-        npm install -g @nicepkg/opencode 2>$null
+        npm install -g opencode-ai 2>$null
     } else {
         Write-Host "WARN: npm not found - skip opencode install."
     }

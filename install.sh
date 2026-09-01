@@ -143,15 +143,22 @@ if should_install tmux; then
   "$HOME/.tmux/plugins/tpm/bin/install_plugins" 2>/dev/null || echo "WARN: tpm plugins skipped. Run prefix+I inside tmux."
 fi
 
-if should_install vim; then
-  if [ ! -d "$HOME/.vim_runtime" ]; then
-    git clone --depth=1 https://github.com/amix/vimrc.git "$HOME/.vim_runtime" || echo "WARN: vimrc clone failed."
+if should_install opencode; then
+  if command -v npm &>/dev/null; then
+    command -v opencode &>/dev/null || npm install -g opencode-ai || echo "WARN: opencode install failed."
+    # Plugins listed in opencode.jsonc are resolved from this local node_modules.
+    [ -d "$HOME/.config/opencode/node_modules" ] || \
+      (cd "$HOME/.config/opencode" && npm install --prefer-offline) || echo "WARN: opencode plugin install failed."
+  else
+    echo "WARN: npm not found - skip opencode install. Install Node.js and re-run."
   fi
-  [ -f "$HOME/.vim_runtime/install_basic_vimrc.sh" ] && sh "$HOME/.vim_runtime/install_basic_vimrc.sh"
 fi
 
-if should_install zsh && command -v zsh &>/dev/null && [ "$SHELL" != "$(which zsh)" ]; then
-  chsh -s "$(which zsh)"
+if should_install zsh && command -v zsh &>/dev/null; then
+  # $SHELL is unreliable: /etc/bashrc hardcodes SHELL=/bin/bash. Read the real
+  # login shell from passwd instead.
+  login_shell="$(getent passwd "$USER" | cut -d: -f7)"
+  [ "$login_shell" != "$(command -v zsh)" ] && chsh -s "$(command -v zsh)"
 fi
 
 echo "Done. Restart your shell."
