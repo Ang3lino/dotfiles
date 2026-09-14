@@ -6,10 +6,18 @@ Personal dotfiles for zsh, tmux, neovim, vim, opencode, and PowerShell.
 
 ### Linux / macOS / WSL
 
+`make` is a prerequisite. Get it first if it's missing:
+
+```bash
+xcode-select --install       # macOS
+sudo apt install make        # Ubuntu/Debian
+sudo dnf install make        # Fedora
+```
+
 ```bash
 git clone https://github.com/Ang3lino/dotfiles.git ~/dotfiles
 cd ~/dotfiles
-./install.sh
+make
 ```
 
 ### Windows
@@ -35,28 +43,30 @@ by falling back to junctions (directories) and copies (files) when symlinks aren
 ### Options
 
 ```bash
-./install.sh                   # everything
-./install.sh zsh nvim          # just zsh + neovim
-./install.sh --minimal zsh     # zsh without extras (no starship, lazygit, aws, terraform)
-./install.sh deps              # system packages only, no configs
+make                            # everything
+make zsh nvim                   # just zsh + neovim
+make deps MINIMAL=1             # system packages only, no extras (no starship, lazygit, aws, terraform)
+make deps                       # system packages only, with extras
 ```
 
-Components: `deps`, `zsh`, `tmux`, `nvim`, `opencode`. No args = everything.
+Targets: `deps`, `zsh`, `tmux`, `nvim`, `opencode`, `all` (default, no args needed).
+`make nvim` (or any component target) pulls in `deps` automatically as a prerequisite —
+there's no hand-written ordering, `make` handles it.
 
 Uses GNU Stow for symlinks — each top-level dir mirrors `$HOME`.
 
 ## What's included
 
-There is one installer per OS. Individual tools have no separate installer;
-`install.sh` / `setup-config.ps1` handle every component.
+Per-OS package logic lives in `os/macos.mk`, `os/ubuntu.mk`, `os/fedora.mk`. Adding an OS
+means adding one file plus one line of detection in the `Makefile` — see AGENTS.md.
 
 | Tool | Config | Linux/macOS | Windows |
 |------|--------|-------------|---------|
-| zsh | `.zshrc`, `starship.toml` | `./install.sh zsh` | N/A (use WSL) |
+| zsh | `.zshrc`, `starship.toml` | `make zsh` | N/A (use WSL) |
 | PowerShell | `profile.ps1`, `starship.toml` | N/A | `pwsh/install.ps1` (called by `install.ps1`) |
-| tmux | `tmux.conf` | `./install.sh tmux` | N/A (use WSL) |
-| neovim | LazyVim config | `./install.sh nvim` | `.\setup-config.ps1` |
-| opencode | agent config, skills, commands | `./install.sh opencode` | `.\setup-config.ps1` |
+| tmux | `tmux.conf` | `make tmux` | N/A (use WSL) |
+| neovim | LazyVim config | `make nvim` | `.\setup-config.ps1` |
+| opencode | agent config, skills, commands | `make opencode` | `.\setup-config.ps1` |
 
 ## Secrets
 
@@ -86,7 +96,7 @@ OpenCode itself is the npm package **`opencode-ai`** (not `@nicepkg/opencode`, w
 does not exist on npm). Node.js is a hard prerequisite on both platforms.
 
 ```bash
-./install.sh opencode          # Linux/macOS/WSL — stow + opencode-ai + plugins
+make opencode                   # Linux/macOS/WSL — stow + opencode-ai + plugins
 ```
 
 ```powershell

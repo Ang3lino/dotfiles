@@ -3,13 +3,15 @@
 ## Repo structure
 
 ```
-install.sh          # Top-level installer (deps + stow + bootstrap)
-install.ps1         # Windows installer (winget + delegates to setup-config.ps1)
-setup-config.ps1    # Windows config-only (no admin: junctions/copies fallback)
-zsh/.zshrc          # → ~/.zshrc (via stow)
-zsh/.config/        # → ~/.config/starship.toml (via stow)
-tmux/.tmux.conf     # → ~/.tmux.conf (via stow)
-nvim/.config/nvim/  # → ~/.config/nvim/ (via stow) or %LOCALAPPDATA%\nvim (via symlink/junction)
+Makefile             # Entry point. Targets: all, deps, zsh, tmux, nvim, opencode, check
+os/                   # Per-OS package backends: macos.mk, ubuntu.mk, fedora.mk
+lib/                  # lib/stow.sh (per-package symlink cleanup + stow), lib/verify-linux.sh (Docker gate)
+install.ps1           # Windows installer (winget + delegates to setup-config.ps1)
+setup-config.ps1      # Windows config-only (no admin: junctions/copies fallback)
+zsh/.zshrc            # → ~/.zshrc (via stow)
+zsh/.config/          # → ~/.config/starship.toml (via stow)
+tmux/.tmux.conf       # → ~/.tmux.conf (via stow)
+nvim/.config/nvim/    # → ~/.config/nvim/ (via stow) or %LOCALAPPDATA%\nvim (via symlink/junction)
 opencode/.config/opencode/  # → ~/.config/opencode/ (via stow)
 opencode/.agents/skills/    # → ~/.agents/skills/ (via stow)
 ```
@@ -22,7 +24,7 @@ opencode/.agents/skills/    # → ~/.agents/skills/ (via stow)
 - Because targets are symlinks into the repo, editing repo content is live immediately.
   Re-stow only when files are added or removed. Dry-run with `stow -n -v` first.
 - Shell scripts use `#!/usr/bin/env bash`, `set -e`, and resolve `SCRIPT_DIR` for portability.
-- System packages are installed in the root `install.sh`; stow handles config placement.
+- System packages are installed by the per-OS backends in `os/*.mk`; stow handles config placement.
 - Plugin managers bootstrap post-stow (znap, tpm, lazy.nvim).
 - `.gitignore` excludes cloned plugin dirs (`znap/`, `zsh-users/`).
 - On Windows, `setup-config.ps1` falls back to junctions (dirs) and copies (files) when
@@ -30,7 +32,8 @@ opencode/.agents/skills/    # → ~/.agents/skills/ (via stow)
   Mode for real symlinks without elevation.
 - `oh-my-openagent.json` is a git symlink (mode `120000`). When `core.symlinks=false`
   (Windows default), git checks it out as a plain text stub containing the target filename.
-  Both `install.ps1`/`setup-config.ps1` and `install.sh` detect and resolve the stub.
+  On Windows, `install.ps1`/`setup-config.ps1` detect and resolve the stub. On Linux/macOS,
+  `lib/stow.sh` does the same after stowing the `opencode` package.
 - zsh gets no `/etc/profile` (no `/etc/zprofile` exists), so `PATH` must be set explicitly
   in `zsh/.zshrc`. Do not rely on `~/.bashrc` — zsh never reads it.
 - `$SHELL` is unreliable: `/etc/bashrc` hardcodes `SHELL=/bin/bash`. Read the login shell
@@ -92,10 +95,19 @@ echo 'precedence ::ffff:0:0/96  100' | sudo tee /etc/gai.conf
 ## Commands
 
 ```bash
-./install.sh              # Full setup (deps + all components)
-./install.sh zsh nvim     # Selective: only zsh + nvim
-./install.sh --minimal    # Skip starship, lazygit, AWS, terraform
-./install.sh deps         # System packages only
+make                       # Full setup (deps + all components: zsh tmux nvim opencode)
+make zsh nvim              # Selective: only zsh + nvim
+make deps MINIMAL=1        # System packages only, skip starship, lazygit, AWS, terraform
+make deps                  # System packages only, with extras
+make check                 # Regression gate: asserts every component target is .PHONY
+```
+
+`make` itself is a prerequisite. Stock `ubuntu:24.04` has neither `make` nor `stow`:
+
+```bash
+xcode-select --install       # macOS
+sudo apt install make        # Ubuntu/Debian
+sudo dnf install make        # Fedora
 ```
 
 ```powershell
@@ -106,9 +118,25 @@ echo 'precedence ::ffff:0:0/96  100' | sudo tee /etc/gai.conf
 ## Adding a new tool
 
 1. Create `tool/.config/tool/` mirroring target path relative to `$HOME`.
-2. Add system package to `install.sh` (all three package managers).
-3. Add `tool` to the stow loop in `install.sh`.
-4. If it needs shell init, add `eval "$(tool init zsh)"` to `zsh/.zshrc`.
+2. Add the system package to each `os/*.mk` (`macos.mk`, `ubuntu.mk`, `fedora.mk`).
+3. Add a `tool: deps` target to the `Makefile`, including `tool` in the `.PHONY` list.
+4. Add `tool`'s package→target-paths entry to the `case` in `lib/stow.sh`.
+5. If it needs shell init, add `eval "$(tool init zsh)"` to `zsh/.zshrc`.
+
+## Adding an OS backend
+
+Adding OS support is one file plus one line, by design:
+
+1. Create `os/<name>.mk` defining a `deps-install` target (and `.PHONY: deps-install`)
+   that installs packages via that OS's package manager, honoring `MINIMAL` the same
+   way `os/macos.mk` does. Every recipe line must be self-contained — GNU Make 3.81
+   gives each line its own shell, so `cd` and shell variables don't persist across lines.
+2. Add one branch to the OS-detection line near the top of the `Makefile`:
+   `OS ?= $(if $(filter Darwin,$(UNAME_S)),macos,$(if $(wildcard /etc/fedora-release),fedora,ubuntu))`.
+   The `Makefile` matches against `$(wildcard os/*.mk)` rather than probing the file
+   directly, so `OS=../something` can never `include` a file outside `os/`.
+
+Override for testing without touching the detection logic: `make nvim OS=ubuntu`.
 
 ## Neovim
 
