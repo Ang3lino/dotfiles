@@ -56,8 +56,12 @@ Get-ChildItem "$cmdSrc\*.md" | ForEach-Object {
 }
 
 # OpenCode skills
-Link-Item "$ScriptDir\opencode\.agents\skills\brainstorming" "$env:USERPROFILE\.agents\skills\brainstorming"
-Link-Item "$ScriptDir\opencode\.agents\skills\find-skills" "$env:USERPROFILE\.agents\skills\find-skills"
+$skillsSrc = "$ScriptDir\opencode\.agents\skills"
+$skillsDst = "$env:USERPROFILE\.agents\skills"
+if (-not (Test-Path $skillsDst)) { New-Item -ItemType Directory -Force -Path $skillsDst | Out-Null }
+Get-ChildItem "$skillsSrc\*" -Directory | ForEach-Object {
+    Link-Item $_.FullName "$skillsDst\$($_.Name)"
+}
 
 # OpenCode plugins (npm)
 $ocDir = "$env:USERPROFILE\.config\opencode"
