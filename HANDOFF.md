@@ -1,3 +1,19 @@
+> **Historical record.** This file documents the PRE-REFACTOR `install.sh` and the
+> incident investigated before the Makefile-based installer existed.
+>
+> - **Bugs A, B and C were fixed in commit `614542f`** — that commit *contains* the
+>   fixes.
+> - **Bugs D and E were fixed during the make refactor**: D — `getent` does not exist
+>   on macOS, so the new installer uses `dscl` and parses the `UserShell:` label;
+>   E — the opencode plugin manifest is now tracked in-repo, so plugins install on a
+>   clean host.
+> - **Every `install.sh:<line>` citation below refers to the PRE-FIX file**, which is
+>   `007a0e3` — the commit this handoff was written against (see "Git:" below).
+>   Recover it with `git show 007a0e3:install.sh`. Do *not* read the citations against
+>   `614542f`: applying the fixes shifted the line numbers there. For example
+>   `install.sh:91` is the Bug A line `target="$(readlink -f "$f")"` at `007a0e3`, but
+>   only a comment at `614542f`.
+
 # Handoff — opencode config repair + install.sh bug report
 
 Date: 2026-09-13
