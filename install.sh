@@ -82,13 +82,18 @@ fi
 # --- Pre-stow cleanup: remove stale symlinks and blocking dirs ---
 for f in "$HOME/.zshrc" "$HOME/.tmux.conf" "$HOME/.config/starship.toml" "$HOME/.config/nvim" \
          "$HOME/.config/opencode/opencode.jsonc" "$HOME/.config/opencode/oh-my-openagent.json"; do
-  if [ -L "$f" ]; then
+  if [ -L "$f" ] && [ ! -e "$f" ]; then
+    # A dangling link is stale by definition. Handle it before readlink, because
+    # BSD readlink -f prints the path but EXITS 1 for a broken link, and under
+    # set -e that status kills the whole script mid-loop with no output.
+    echo "Removing broken symlink: $f"; rm -f "$f"
+  elif [ -L "$f" ]; then
     # readlink -f (not plain readlink): stow writes RELATIVE targets like
     # ../../Documents/repos/dotfiles/..., which never match an absolute
     # $SCRIPT_DIR prefix. Plain readlink made this guard delete every link on
     # every run. -f resolves to an absolute path, and also follows the extra
     # hop for oh-my-openagent.json -> oh-my-openagent.<profile>.json.
-    target="$(readlink -f "$f")"
+    target="$(readlink -f "$f" 2>/dev/null || true)"
     case "$target" in
       "$SCRIPT_DIR"*) ;;
       *) echo "Removing stale symlink: $f -> $target"; rm -f "$f" ;;
@@ -96,14 +101,24 @@ for f in "$HOME/.zshrc" "$HOME/.tmux.conf" "$HOME/.config/starship.toml" "$HOME/
   fi
 done
 for d in "$HOME/.agents/skills" "$HOME/.config/opencode/commands"; do
-  [ -d "$d" ] && [ ! -L "$d" ] && echo "Removing blocking dir: $d" && rm -rf "$d"
+  # Never rm -rf: this once destroyed three unmanaged skills in ~/.agents/skills.
+  if [ -d "$d" ] && [ ! -L "$d" ]; then
+    echo "ERROR: $d is a real directory and blocks stow."
+    echo "       Inspect it, move anything you want to keep into this repo, then remove it by hand."
+    exit 1
+  fi
 done
 mkdir -p "$HOME/.config/opencode" "$HOME/.agents"
 
 # --- Stow packages ---
 for pkg in zsh tmux nvim opencode; do
   if should_install "$pkg"; then
-    stow -v --target="$HOME" --restow "$pkg" 2>&1 | grep -v "BUG" || true
+    if ! out="$(stow -v --target="$HOME" --restow "$pkg" 2>&1)"; then
+      echo "$out" | grep -v "BUG" >&2
+      echo "ERROR: stow failed for package '$pkg'." >&2
+      exit 1
+    fi
+    echo "$out" | grep -v "BUG" || true
   fi
 done
 # NOTE: --adopt is deliberately NOT used. man stow: "This behaviour is
