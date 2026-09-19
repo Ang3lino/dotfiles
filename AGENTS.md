@@ -3,7 +3,7 @@
 ## Repo structure
 
 ```
-Makefile             # Entry point. Targets: all, deps, zsh, tmux, nvim, opencode, check
+Makefile             # Entry point. Targets: all, deps, zsh, tmux, nvim, opencode, alacritty, check
 os/                   # Per-OS package backends: macos.mk, ubuntu.mk, fedora.mk
 lib/                  # lib/stow.sh (per-package symlink cleanup + stow), lib/verify-linux.sh (Docker gate)
 install.ps1           # Windows installer (winget + delegates to setup-config.ps1)
@@ -14,6 +14,8 @@ tmux/.tmux.conf       # → ~/.tmux.conf (via stow)
 nvim/.config/nvim/    # → ~/.config/nvim/ (via stow) or %LOCALAPPDATA%\nvim (via symlink/junction)
 opencode/.config/opencode/  # → ~/.config/opencode/ (via stow)
 opencode/.agents/skills/    # → ~/.agents/skills/ (via stow)
+alacritty/.config/alacritty/  # → ~/.config/alacritty/ (via stow); os/ubuntu.mk also installs
+                               # JetBrainsMono Nerd Font since apt ships none and LazyVim/nvim-web-devicons need glyph coverage
 ```
 
 ## Conventions

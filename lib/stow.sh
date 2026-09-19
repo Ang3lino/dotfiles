@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Stow one package into $HOME: clean stale links, abort on real files, run stow loudly.
-# Usage: lib/stow.sh <zsh|tmux|nvim|opencode>
+# Usage: lib/stow.sh <zsh|tmux|nvim|opencode|alacritty>
 # Self-contained by design: GNU Make 3.81 gives every recipe line its own shell,
 # so this must work from any cwd with nothing exported.
 set -euo pipefail
@@ -14,6 +14,7 @@ case "$pkg" in
 $HOME/.config/starship.toml" ;;
   tmux) targets="$HOME/.tmux.conf" ;;
   nvim) targets="$HOME/.config/nvim" ;;
+  alacritty) targets="$HOME/.config/alacritty/alacritty.toml" ;;
   opencode) targets="$HOME/.config/opencode/opencode.jsonc
 $HOME/.config/opencode/oh-my-openagent.json
 $HOME/.config/opencode/oh-my-openagent.bedrock.json
@@ -23,7 +24,7 @@ $HOME/.config/opencode/oh-my-openagent.opencode-go.json
 $HOME/.config/opencode/commands
 $HOME/.agents/skills
 $HOME/.config/opencode/package.json" ;;
-  *) echo "ERROR: unknown package '$pkg'. Expected one of: zsh tmux nvim opencode" >&2; exit 2 ;;
+  *) echo "ERROR: unknown package '$pkg'. Expected one of: zsh tmux nvim opencode alacritty" >&2; exit 2 ;;
 esac
 
 while IFS= read -r t; do

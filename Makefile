@@ -28,7 +28,7 @@ include os/$(OS).mk
 # zsh/ tmux/ nvim/ opencode/ all exist as real directories at this repo's root.
 # Without .PHONY, `make nvim` prints "`nvim' is up to date." and exits 0 having
 # installed NOTHING. The `check` target below is the regression gate for that.
-.PHONY: all deps zsh tmux nvim opencode check
+.PHONY: all deps zsh tmux nvim opencode alacritty check
 
 # Prerequisite order within `all` is unspecified and the components share mkdir
 # steps that would race. Do not use `make -j`.
@@ -38,7 +38,7 @@ include os/$(OS).mk
 #   make deps MINIMAL=1
 MINIMAL ?=
 
-all: zsh tmux nvim opencode
+all: zsh tmux nvim opencode alacritty
 
 # deps-install is supplied by the included os/$(OS).mk.
 deps: deps-install
@@ -100,6 +100,11 @@ opencode: deps
 	if command -v npm >/dev/null 2>&1; then command -v opencode >/dev/null 2>&1 || npm install -g opencode-ai || echo "WARN: opencode install failed."; else echo "WARN: npm not found - skip opencode install. Install Node.js and re-run."; fi
 	if command -v npm >/dev/null 2>&1; then if [ -d "$$HOME/.config/opencode/node_modules/oh-my-openagent" ] && [ -d "$$HOME/.config/opencode/node_modules/@dietrichgebert/ponytail" ]; then echo "opencode plugins present - skipping npm install."; else (cd "$$HOME/.config/opencode" && npm install --prefer-offline) || echo "WARN: npm install failed in ~/.config/opencode."; [ -d "$$HOME/.config/opencode/node_modules/oh-my-openagent" ] && [ -d "$$HOME/.config/opencode/node_modules/@dietrichgebert/ponytail" ] || echo "WARN: opencode plugins STILL absent after npm install - check that ~/.config/opencode/package.json resolves into this repo."; fi; fi
 
+# Stow only. Font install (Nerd Font, needed for LazyVim/devicons glyphs) is
+# handled in deps-install per-OS, same pattern as the nvim version bump above.
+alacritty: deps
+	lib/stow.sh alacritty
+
 # Anti-phony regression gate. Two probes, because one is not enough:
 #   1. SYMPTOM - the user-visible "`nvim' is up to date." that silently installs nothing.
 #   2. CAUSE   - make's own database marking the target .PHONY.
@@ -108,5 +113,5 @@ opencode: deps
 # Probe 2 fires on the lost .PHONY regardless of prerequisites.
 # Single-line recipes; $$ escapes make's $.
 check:
-	@for t in all deps zsh tmux nvim opencode; do $(MAKE) -n $$t 2>&1 | grep -q "is up to date" && { echo "FAIL: target '$$t' reports 'is up to date' - it is shadowed by a same-named file or directory. Add it to .PHONY."; exit 1; }; done; echo "ok: no target reports 'is up to date'"
-	@db=$$($(MAKE) -p -n 2>/dev/null); for t in all deps zsh tmux nvim opencode; do echo "$$db" | grep -A1 "^$$t:" | grep -q "Phony target" || { echo "FAIL: target '$$t' is NOT marked .PHONY - a same-named file or directory would shadow it. Add it to .PHONY."; exit 1; }; done; echo "PASS: all six targets are .PHONY and none reports 'is up to date'"
+	@for t in all deps zsh tmux nvim opencode alacritty; do $(MAKE) -n $$t 2>&1 | grep -q "is up to date" && { echo "FAIL: target '$$t' reports 'is up to date' - it is shadowed by a same-named file or directory. Add it to .PHONY."; exit 1; }; done; echo "ok: no target reports 'is up to date'"
+	@db=$$($(MAKE) -p -n 2>/dev/null); for t in all deps zsh tmux nvim opencode alacritty; do echo "$$db" | grep -A1 "^$$t:" | grep -q "Phony target" || { echo "FAIL: target '$$t' is NOT marked .PHONY - a same-named file or directory would shadow it. Add it to .PHONY."; exit 1; }; done; echo "PASS: all seven targets are .PHONY and none reports 'is up to date'"
