@@ -11,14 +11,22 @@
 # `sudo: gpg: command not found`, leaving a bare "WARN: terraform install failed."
 # with no cause. Same omission exists in install.sh:33; this is the fix, not a
 # refactor regression.
-PKGS_CORE := stow zsh tmux git neovim fzf zoxide ripgrep fd-find jq unzip curl wget gnupg
+# Ubuntu's apt repo (noble/universe) ships neovim 0.9.5, which is too old for
+# LazyVim (requires >=0.11.2 - see https://github.com/LazyVim/LazyVim/issues/6421).
+# neovim is therefore NOT in PKGS_CORE; it's installed below from the official
+# GitHub release tarball into /opt and symlinked onto PATH instead.
+PKGS_CORE := stow zsh tmux git fzf zoxide ripgrep fd-find jq unzip curl wget gnupg
 PKGS_EXTRA := starship lazygit awscli terraform
+
+NVIM_MIN_MAJOR := 0
+NVIM_MIN_MINOR := 11
 
 .PHONY: deps-install
 
 deps-install:
 	sudo -v
 	sudo apt install -y $(PKGS_CORE)
+	ver="$$(command -v nvim >/dev/null 2>&1 && nvim --version | head -1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' || echo 0.0.0)"; maj="$$(echo "$$ver" | cut -d. -f1)"; min="$$(echo "$$ver" | cut -d. -f2)"; if [ "$$maj" -gt "$(NVIM_MIN_MAJOR)" ] || { [ "$$maj" -eq "$(NVIM_MIN_MAJOR)" ] && [ "$$min" -ge "$(NVIM_MIN_MINOR)" ]; }; then echo "nvim $$ver already satisfies >=$(NVIM_MIN_MAJOR).$(NVIM_MIN_MINOR) - skipping."; else curl -fsSLo /tmp/nvim-linux-x86_64.tar.gz https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz && sudo rm -rf /opt/nvim-linux-x86_64 && sudo tar xf /tmp/nvim-linux-x86_64.tar.gz -C /opt && sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/nvim && rm -f /tmp/nvim-linux-x86_64.tar.gz || echo "WARN: nvim release install failed - LazyVim needs >=0.11.2."; fi
 	if [ -z "$(MINIMAL)" ]; then command -v starship >/dev/null 2>&1 || (curl -sS https://starship.rs/install.sh | sh -s -- -y) || echo "WARN: starship install failed."; fi
 	if [ -z "$(MINIMAL)" ]; then if command -v lazygit >/dev/null 2>&1; then : > /tmp/lazygit-version.txt; else bash lib/lazygit-version.sh > /tmp/lazygit-version.txt 2>/dev/null || : > /tmp/lazygit-version.txt; fi; fi
 	if [ -z "$(MINIMAL)" ] && [ -s /tmp/lazygit-version.txt ]; then curl -Lo /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_$$(cat /tmp/lazygit-version.txt)_Linux_x86_64.tar.gz" && tar xf /tmp/lazygit.tar.gz -C /tmp lazygit && sudo install /tmp/lazygit /usr/local/bin || echo "WARN: lazygit install failed."; fi
