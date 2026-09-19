@@ -76,6 +76,7 @@ zsh: deps
 tmux: deps
 	lib/stow.sh tmux
 	if [ ! -d "$$HOME/.tmux/plugins/tpm" ]; then git clone --depth 1 https://github.com/tmux-plugins/tpm "$$HOME/.tmux/plugins/tpm" || echo "WARN: tpm clone failed."; else echo "tpm already cloned - skipping."; fi
+	tmux source "$$HOME/.tmux.conf" 2>/dev/null || true
 	"$$HOME/.tmux/plugins/tpm/bin/install_plugins" 2>/dev/null || echo "WARN: tpm plugins skipped. Run prefix+I inside tmux."
 
 # Stow only. LazyVim bootstraps itself on first nvim launch; install.sh had no
