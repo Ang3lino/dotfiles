@@ -11,7 +11,9 @@ pkg="${1-}"
 # bash 3.2 ships on macOS and has no associative arrays, so the map is a case.
 case "$pkg" in
   zsh)  targets="$HOME/.zshrc
-$HOME/.config/starship.toml" ;;
+$HOME/.config/starship.toml
+$HOME/.markdownlint-cli2.jsonc
+$HOME/.markdownlint.json" ;;
   tmux) targets="$HOME/.tmux.conf" ;;
   nvim) targets="$HOME/.config/nvim" ;;
   alacritty) targets="$HOME/.config/alacritty/alacritty.toml" ;;

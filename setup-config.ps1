@@ -89,4 +89,8 @@ if ($Force -or -not (Get-Command opencode -ErrorAction SilentlyContinue)) {
 # Bash (Git Bash)
 Link-Item "$ScriptDir\bash\.bashrc" "$env:USERPROFILE\.bashrc"
 
+# markdownlint
+Link-Item "$ScriptDir\zsh\.markdownlint-cli2.jsonc" "$env:USERPROFILE\.markdownlint-cli2.jsonc"
+Link-Item "$ScriptDir\zsh\.markdownlint.json"       "$env:USERPROFILE\.markdownlint.json"
+
 Write-Host "Done."

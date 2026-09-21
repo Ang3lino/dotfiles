@@ -68,6 +68,65 @@ means adding one file plus one line of detection in the `Makefile` — see AGENT
 | neovim | LazyVim config | `make nvim` | `.\setup-config.ps1` |
 | opencode | agent config, skills, commands | `make opencode` | `.\setup-config.ps1` |
 
+## Neovim
+
+Config lives in `nvim/.config/nvim/` — a LazyVim-based setup with custom plugin
+files under `lua/plugins/`.
+
+### Modifying config after install
+
+`~/.config/nvim` is a symlink into this repo, so **editing any existing file here
+is live immediately** — no stow, no make, just save and (re)open Neovim.
+
+Re-stow is only needed when **adding or removing files**, because only then does
+the set of required links change:
+
+```bash
+stow -n -v --target="$HOME" --restow nvim   # dry run first
+stow    -v --target="$HOME" --restow nvim
+```
+
+On Windows, `%LOCALAPPDATA%\nvim` is a junction/symlink to the same repo directory.
+No re-run needed for edits to existing files; for adding/removing files re-run:
+
+```powershell
+.\setup-config.ps1
+```
+
+### Adding a plugin
+
+1. Create `nvim/.config/nvim/lua/plugins/<name>.lua` returning a lazy.nvim spec.
+2. Save — LazyVim picks it up on next Neovim launch (no stow needed, file is inside
+   the already-linked directory).
+3. Run `:Lazy sync` inside Neovim to install.
+
+### Updating plugins
+
+```
+:Lazy sync
+```
+
+Runs inside Neovim. `lazy-lock.json` in the repo records pinned commits — commit
+it after intentional updates so every machine lands on the same versions.
+
+### markdownlint (MD013 and friends)
+
+Neovim lints Markdown files with `markdownlint-cli2` (installed via Mason). Rules
+are configured in `zsh/.markdownlint-cli2.jsonc`, which stows to
+`~/.markdownlint-cli2.jsonc`. The linter walks up from each file's directory and
+stops at the first config it finds; the home-level file is the global fallback for
+anything under `$HOME`.
+
+Current global overrides:
+
+| Rule | Value | Reason |
+|------|-------|--------|
+| MD013 (line length) | disabled | long lines are fine in prose and code comments |
+
+To change a rule, edit `zsh/.markdownlint-cli2.jsonc` — takes effect immediately
+(the linter re-reads config on every lint run). On Windows `.\setup-config.ps1`
+links the same file to `%USERPROFILE%\.markdownlint-cli2.jsonc`.
+
 ## Secrets
 
 Create a secrets file (never committed) for API keys:
