@@ -1,13 +1,13 @@
 -- ponytail: ruff managed externally via uv, skip Mason install
 return {
   {
-    "williamboman/mason.nvim",
+    "mason-org/mason.nvim",
     opts = {
       ensure_installed = {},
     },
   },
   {
-    "williamboman/mason-lspconfig.nvim",
+    "mason-org/mason-lspconfig.nvim",
     opts = function(_, opts)
       opts.ensure_installed = vim.tbl_filter(function(server)
         return server ~= "ruff"
