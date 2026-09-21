@@ -122,6 +122,7 @@ Current global overrides:
 | Rule | Value | Reason |
 |------|-------|--------|
 | MD013 (line length) | disabled | long lines are fine in prose and code comments |
+| MD030 (spaces after list markers) | disabled | cosmetic; no renderer enforces it |
 
 To change a rule, edit `zsh/.markdownlint-cli2.jsonc` — takes effect immediately
 (the linter re-reads config on every lint run). On Windows `.\setup-config.ps1`
