@@ -67,8 +67,7 @@ eval "$(zoxide init zsh)"
 [[ -f ~/.secrets ]] && source ~/.secrets
 
 ### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
-# ponytail: Rancher wrote an absolute /Users/angel path into a file stowed on
-# Linux and WSL too. Guarded so it is inert off this machine. Upgrade path: if
-# Rancher rewrites this block on update, the guard is lost - re-add it.
 [[ -d "$HOME/.rd/bin" ]] && export PATH="$HOME/.rd/bin:$PATH"
 ### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)
+
+[[ -x /home/linuxbrew/.linuxbrew/bin/brew ]] && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
