@@ -21,3 +21,4 @@ deps-install:
 	if [ -z "$(MINIMAL)" ]; then brew list --versions lazygit >/dev/null 2>&1 || brew install lazygit || echo "WARN: lazygit install failed."; fi
 	if [ -z "$(MINIMAL)" ]; then brew list --versions awscli >/dev/null 2>&1 || brew install awscli || echo "WARN: AWS CLI install failed."; fi
 	if [ -z "$(MINIMAL)" ]; then brew list --versions terraform >/dev/null 2>&1 || brew install terraform || echo "WARN: terraform install failed."; fi
+	brew list --versions kitty >/dev/null 2>&1 || brew install --cask kitty || echo "WARN: kitty install failed."

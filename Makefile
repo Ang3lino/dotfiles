@@ -28,7 +28,7 @@ include os/$(OS).mk
 # zsh/ tmux/ nvim/ opencode/ all exist as real directories at this repo's root.
 # Without .PHONY, `make nvim` prints "`nvim' is up to date." and exits 0 having
 # installed NOTHING. The `check` target below is the regression gate for that.
-.PHONY: all deps zsh tmux nvim opencode alacritty check
+.PHONY: all deps zsh tmux nvim opencode alacritty kitty check
 
 # Prerequisite order within `all` is unspecified and the components share mkdir
 # steps that would race. Do not use `make -j`.
@@ -38,7 +38,7 @@ include os/$(OS).mk
 #   make deps MINIMAL=1
 MINIMAL ?=
 
-all: zsh tmux nvim opencode alacritty
+all: zsh tmux nvim opencode alacritty kitty
 
 # deps-install is supplied by the included os/$(OS).mk.
 deps: deps-install
@@ -106,6 +106,15 @@ opencode: deps
 alacritty: deps
 	lib/stow.sh alacritty
 
+# Upstream installer places kitty at ~/.local/kitty.app/. The installer is
+# idempotent and handles upgrades. stow links ~/.config/kitty/ from the repo.
+# The .desktop file is generated post-install with absolute paths; it cannot
+# be stowed since it references the upstream install location.
+kitty: deps
+	if command -v kitty >/dev/null 2>&1; then echo "kitty already installed - skipping."; else curl -fsSL https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin launch=n || echo "WARN: kitty install failed."; fi
+	lib/stow.sh kitty
+	if command -v kitty >/dev/null 2>&1; then kitty_bin="$$(command -v kitty)"; app_dir="$$(dirname "$$kitty_bin")"; icon="$$app_dir/../lib/kitty/logo/kitty-128.png"; mkdir -p "$$HOME/.local/share/applications"; sed "s|^Exec=kitty|Exec=$$kitty_bin|; s|^Icon=kitty|Icon=$$icon|" "$$app_dir/../share/applications/kitty.desktop" > "$$HOME/.local/share/applications/kitty.desktop" && update-desktop-database "$$HOME/.local/share/applications" 2>/dev/null || true; fi
+
 # Anti-phony regression gate. Two probes, because one is not enough:
 #   1. SYMPTOM - the user-visible "`nvim' is up to date." that silently installs nothing.
 #   2. CAUSE   - make's own database marking the target .PHONY.
@@ -114,5 +123,5 @@ alacritty: deps
 # Probe 2 fires on the lost .PHONY regardless of prerequisites.
 # Single-line recipes; $$ escapes make's $.
 check:
-	@for t in all deps zsh tmux nvim opencode alacritty; do $(MAKE) -n $$t 2>&1 | grep -q "is up to date" && { echo "FAIL: target '$$t' reports 'is up to date' - it is shadowed by a same-named file or directory. Add it to .PHONY."; exit 1; }; done; echo "ok: no target reports 'is up to date'"
-	@db=$$($(MAKE) -p -n 2>/dev/null); for t in all deps zsh tmux nvim opencode alacritty; do echo "$$db" | grep -A1 "^$$t:" | grep -q "Phony target" || { echo "FAIL: target '$$t' is NOT marked .PHONY - a same-named file or directory would shadow it. Add it to .PHONY."; exit 1; }; done; echo "PASS: all seven targets are .PHONY and none reports 'is up to date'"
+	@for t in all deps zsh tmux nvim opencode alacritty kitty; do $(MAKE) -n $$t 2>&1 | grep -q "is up to date" && { echo "FAIL: target '$$t' reports 'is up to date' - it is shadowed by a same-named file or directory. Add it to .PHONY."; exit 1; }; done; echo "ok: no target reports 'is up to date'"
+	@db=$$($(MAKE) -p -n 2>/dev/null); for t in all deps zsh tmux nvim opencode alacritty kitty; do echo "$$db" | grep -A1 "^$$t:" | grep -q "Phony target" || { echo "FAIL: target '$$t' is NOT marked .PHONY - a same-named file or directory would shadow it. Add it to .PHONY."; exit 1; }; done; echo "PASS: all eight targets are .PHONY and none reports 'is up to date'"

@@ -67,6 +67,37 @@ means adding one file plus one line of detection in the `Makefile` — see AGENT
 | tmux | `tmux.conf` | `make tmux` | N/A (use WSL) |
 | neovim | LazyVim config | `make nvim` | `.\setup-config.ps1` |
 | opencode | agent config, skills, commands | `make opencode` | `.\setup-config.ps1` |
+| kitty | `kitty.conf`, Catppuccin theme | `make kitty` | N/A (kitty has no Windows build) |
+
+## Kitty
+
+Installed via the [official upstream installer](https://sw.kovidgoyal.net/kitty/binary/)
+into `~/.local/kitty.app/`. This is the recommended approach on Linux — the apt
+package (0.32) is too far behind upstream (0.48+). On macOS, installed via
+`brew install --cask kitty`.
+
+Config lives in `kitty/.config/kitty/` and stows to `~/.config/kitty/`. The
+`.desktop` file is generated post-install by `make kitty` with paths absolute to
+the install location — it cannot be stowed.
+
+### Modifying config after install
+
+`~/.config/kitty` is a symlink to the repo directory, so edits to `kitty.conf`
+or the theme are live immediately — kitty reloads config on `ctrl+shift+f5`
+or automatically when the file changes (if `watch_config yes` is set).
+
+Re-stow only needed when adding or removing files:
+
+```bash
+stow -n -v --target="$HOME" --restow kitty   # dry run
+stow    -v --target="$HOME" --restow kitty
+```
+
+### Theme
+
+Ships with [Catppuccin Mocha](https://github.com/catppuccin/kitty) to match the
+LazyVim default colorscheme. To switch themes, replace the `include` line at the
+bottom of `kitty.conf` and drop a new `.conf` file into `kitty/.config/kitty/themes/`.
 
 ## Neovim
 

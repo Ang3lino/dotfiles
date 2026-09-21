@@ -93,4 +93,7 @@ Link-Item "$ScriptDir\bash\.bashrc" "$env:USERPROFILE\.bashrc"
 Link-Item "$ScriptDir\zsh\.markdownlint-cli2.jsonc" "$env:USERPROFILE\.markdownlint-cli2.jsonc"
 Link-Item "$ScriptDir\zsh\.markdownlint.json"       "$env:USERPROFILE\.markdownlint.json"
 
+# kitty — no Windows build; use Windows Terminal or WSL instead.
+# See README.md for the Linux/macOS install path.
+
 Write-Host "Done."

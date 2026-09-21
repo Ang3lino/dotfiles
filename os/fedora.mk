@@ -27,6 +27,7 @@ deps-install:
 	# --from-repofile=), same dual-fallback shape as the dnf5-command guard above;
 	# this is the config-manager compatibility fallback ported from install.sh:75.
 	if [ -z "$(MINIMAL)" ]; then command -v terraform >/dev/null 2>&1 || (sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/fedora/hashicorp.repo 2>/dev/null || sudo dnf config-manager addrepo --from-repofile=https://rpm.releases.hashicorp.com/fedora/hashicorp.repo 2>/dev/null || true; sudo dnf install -y terraform) || echo "WARN: terraform install failed."; fi
+	command -v kitty >/dev/null 2>&1 || (curl -fsSL https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin launch=n) || echo "WARN: kitty install failed."
 # ponytail: plain `sudo -v` above, no keepalive loop - install.sh:9-12's
 # backgrounded "re-authenticate sudo every 50s while this process is alive"
 # loop cannot survive here: each make recipe line is its own shell, so a

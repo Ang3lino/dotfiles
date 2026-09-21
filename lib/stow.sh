@@ -17,6 +17,7 @@ $HOME/.markdownlint.json" ;;
   tmux) targets="$HOME/.tmux.conf" ;;
   nvim) targets="$HOME/.config/nvim" ;;
   alacritty) targets="$HOME/.config/alacritty/alacritty.toml" ;;
+  kitty) targets="$HOME/.config/kitty" ;;
   opencode) targets="$HOME/.config/opencode/opencode.jsonc
 $HOME/.config/opencode/oh-my-openagent.json
 $HOME/.config/opencode/oh-my-openagent.bedrock.json
@@ -26,7 +27,7 @@ $HOME/.config/opencode/oh-my-openagent.opencode-go.json
 $HOME/.config/opencode/commands
 $HOME/.agents/skills
 $HOME/.config/opencode/package.json" ;;
-  *) echo "ERROR: unknown package '$pkg'. Expected one of: zsh tmux nvim opencode alacritty" >&2; exit 2 ;;
+  *) echo "ERROR: unknown package '$pkg'. Expected one of: zsh tmux nvim opencode alacritty kitty" >&2; exit 2 ;;
 esac
 
 while IFS= read -r t; do
